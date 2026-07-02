@@ -2,7 +2,7 @@
 
 CourseCompass is a smart, browser-based web application that helps students discover the right academic course based on their subject performance and personal interests. Instead of leaving course selection to guesswork, it converts marks and preferences into clear, ranked, and personalized recommendations.
 
-🔗 Live Demo: [https://github.com/Thejas127/course-compass]
+🔗 Live Demo: [https://thejas127.github.io/course-compass/COURSE-ADVISOR-bright.html]
 
 
 ✨ Features
@@ -43,7 +43,7 @@ LayerTechnologyFrontendHTML5, CSS3, JavaScript (Vanilla)StylingCustom CSS — Gr
 No build tools or dependencies required — this is a pure front-end project.
 
 bash# Clone the repository
-git clone https://github.com/your-username/course-compass.git
+git clone https://github.com/Thejas127/course-compass.git
 
 # Navigate into the project folder
 cd course-compass
