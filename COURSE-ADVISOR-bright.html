@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COURSE ADVISOR</title>
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* === OFFLINE-SAFE FONT DEFINITIONS === */
+  /* Cinzel → Georgia / Times (serif display) */
+  /* Cormorant Garamond → Georgia (body serif) */
+  /* Courier Prime → Courier New (mono) */
+
+  :root {
+    --bg:        #0a0a0a;
+    --bg2:       #111111;
+    --bg3:       #161616;
+    --panel:     #141414;
+    --border:    rgba(212,175,55,0.30);
+    --border2:   rgba(212,175,55,0.50);
+    --cyan:      #f0c830;
+    --cyan-dim:  rgba(240,200,48,0.15);
+    --cyan-glow: rgba(240,200,48,0.50);
+    --lime:      #e2be5a;
+    --lime-dim:  rgba(226,190,90,0.15);
+    --amber:     #ffd97a;
+    --amber-dim: rgba(255,217,122,0.15);
+    --violet:    #d4a830;
+    --violet-dim:rgba(212,168,48,0.15);
+    --red:       #ff6680;
+    --red-dim:   rgba(255,102,128,0.15);
+    --text:      #f5e8c0;
+    --text-muted:#c8aa60;
+    --text-dim:  #7a6030;
+    --white:     #fff8e8;
+    --grid-line: rgba(212,175,55,0.06);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,55,0.10) 0%, transparent 60%),
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(5,10,18,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo { display: flex; align-items: center; gap: 12px; }
+
+  .logo-mark {
+    width: 32px; height: 32px;
+    border: 1px solid var(--cyan);
+    background: var(--cyan-dim);
+    display: flex; align-items: center; justify-content: center;
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    box-shadow: 0 0 12px var(--cyan-glow), inset 0 0 12px rgba(0,230,200,0.05);
+  }
+
+  .logo-mark svg { width: 16px; height: 16px; }
+
+  .logo-name {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 22px; color: var(--white); letter-spacing: 2px;
+  }
+  .logo-name span { color: var(--cyan); }
+
+  .header-tag {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px; color: var(--text);
+    letter-spacing: 1.5px; text-transform: uppercase;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .header-tag::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--lime); border-radius: 50%;
+    box-shadow: 0 0 8px var(--lime);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* HOW IT WORKS BANNER */
+  .how-banner {
+    background: linear-gradient(90deg, rgba(212,175,55,0.07) 0%, rgba(184,148,46,0.04) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+  }
+
+  .how-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 24px;
+  }
+
+  .how-step-num {
+    width: 24px; height: 24px;
+    border: 1px solid var(--cyan);
+    background: var(--cyan-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 14px; color: var(--cyan);
+    flex-shrink: 0;
+    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+  }
+
+  .how-step-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px; color: var(--text);
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  .how-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    padding: 0 4px;
+  }
+
+  .how-formula {
+    margin-left: 32px;
+    padding-left: 32px;
+    border-left: 1px solid var(--border);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px; color: var(--text);
+    letter-spacing: 0.5px;
+  }
+
+  .how-formula strong { color: var(--cyan); }
+  .how-formula em { color: var(--lime); font-style: normal; }
+
+  /* HERO */
+  .hero {
+    padding: 72px 48px 52px;
+    max-width: 1120px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--cyan);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .hero-eyebrow::before { content: '//'; opacity: 0.5; }
+
+  .hero h1 {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 72px; line-height: 0.95;
+    color: var(--white); margin-bottom: 22px; letter-spacing: 2px;
+  }
+
+  .hero h1 em {
+    color: var(--cyan); font-style: normal;
+    text-shadow: 0 0 30px var(--cyan-glow);
+  }
+
+  .hero-desc {
+    font-size: 15px; color: var(--text);
+    line-height: 1.75; margin-bottom: 32px;
+    font-weight: 300; max-width: 420px;
+  }
+
+  .hero-stats { display: flex; gap: 32px; }
+
+  .stat {
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 12px 16px;
+    background: var(--panel); border: 1px solid var(--border);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+  }
+
+  .stat-num {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 32px; color: var(--cyan);
+    letter-spacing: 1px; line-height: 1;
+    text-shadow: 0 0 16px var(--cyan-glow);
+  }
+
+  .stat-label {
+    font-size: 10px; color: var(--text-muted);
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* HERO VISUAL */
+  .hero-visual { position: relative; height: 300px; }
+
+  .float-card {
+    position: absolute;
+    background: var(--panel); border: 1px solid var(--border2);
+    padding: 14px 18px;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px var(--border);
+  }
+
+  .float-card-1 { top:0; left:0; width:210px; animation: float1 4s ease-in-out infinite; }
+  .float-card-2 { top:70px; right:0; width:228px; animation: float2 4.5s ease-in-out infinite; }
+  .float-card-3 { bottom:0; left:50px; width:200px; animation: float1 5s ease-in-out infinite; }
+
+  @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  @keyframes float2 { 0%,100%{transform:translateY(-4px)} 50%{transform:translateY(6px)} }
+
+  .fc-label { font-family:'Courier New',Courier,monospace; font-size:9px; color:var(--text-muted); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; }
+  .fc-course { font-weight:600; font-size:14px; color:var(--white); margin-bottom:10px; }
+  .fc-bar-wrap { height:3px; background:rgba(255,255,255,0.06); overflow:hidden; }
+  .fc-bar { height:100%; }
+  .fc-match { font-size:10px; font-family:'Courier New',Courier,monospace; color:var(--text-muted); margin-top:6px; }
+  .fc-match strong { color:var(--cyan); }
+
+  /* MAIN */
+  .main {
+    max-width: 1120px; margin: 0 auto;
+    padding: 0 48px 80px;
+    display: grid;
+    grid-template-columns: 1fr 390px;
+    gap: 28px;
+    position: relative; z-index: 1;
+  }
+
+  /* FORM CARD */
+  .form-card {
+    background: var(--panel); border: 1px solid var(--border);
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    overflow: hidden;
+  }
+
+  .form-header {
+    background: linear-gradient(90deg, rgba(212,175,55,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 22px 28px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .form-header-title {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 22px; color: var(--white); letter-spacing: 2px;
+  }
+
+  .form-header-sub {
+    font-size: 11px; color: var(--text);
+    margin-top: 3px; font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px;
+  }
+
+  .step-badge {
+    width: 36px; height: 36px;
+    border: 1px solid var(--cyan); background: var(--cyan-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif; font-size: 20px; color: var(--cyan);
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    box-shadow: 0 0 10px var(--cyan-glow);
+  }
+
+  .form-body { padding: 28px; }
+
+  /* STUDENT NAME INPUT */
+  .name-field {
+    margin-bottom: 24px;
+  }
+
+  .name-input-wrap {
+    position: relative;
+  }
+
+  .name-input {
+    width: 100%;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 14px;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .name-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px var(--cyan-glow), 0 0 12px var(--cyan-glow);
+    background: rgba(0,230,200,0.03);
+  }
+
+  .name-input::placeholder { color: var(--text-dim); }
+
+  .section-label {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--cyan); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .section-label::before { content: '>'; opacity: 0.6; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border2), transparent); }
+
+  .subject-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 24px;
+  }
+
+  .subject-field { display: flex; flex-direction: column; gap: 6px; }
+
+  .subject-field label {
+    font-size: 11px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+
+  .subject-icon { width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+
+  .input-wrap { position: relative; }
+
+  .mark-input {
+    width: 100%;
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 10px 42px 10px 14px;
+    font-family: 'Courier New', Courier, monospace; font-size: 16px;
+    color: var(--white); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none; -moz-appearance: textfield;
+  }
+
+  .mark-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 1px var(--cyan-glow), 0 0 12px var(--cyan-glow);
+    background: rgba(0,230,200,0.03);
+  }
+
+  .mark-input::-webkit-inner-spin-button,
+  .mark-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+  .mark-input::placeholder { color: var(--text-dim); }
+
+  /* VALIDATION ERROR */
+  .mark-input.error {
+    border-color: var(--red);
+    box-shadow: 0 0 0 1px rgba(255,77,106,0.3);
+  }
+
+  .field-error {
+    font-size: 9px; font-family: 'Courier New', Courier, monospace;
+    color: var(--red); letter-spacing: 0.5px;
+    margin-top: 2px; display: none;
+  }
+
+  /* MOTIVATIONAL INLINE HINT */
+  .mark-input.warn-low { border-color: var(--amber); }
+  .mark-input.warn-mid { border-color: var(--violet); }
+  .mark-input.great    { border-color: rgba(168,255,62,0.5); }
+
+  .field-hint {
+    font-size: 9px; font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 0.4px; margin-top: 3px;
+    display: none; line-height: 1.4;
+    padding: 4px 8px; border-left: 2px solid;
+  }
+
+  .hint-danger  { color: var(--red);    background: var(--red-dim);    border-color: var(--red);    display: block; }
+  .hint-warn    { color: var(--amber);  background: var(--amber-dim);  border-color: var(--amber);  display: block; }
+  .hint-ok      { color: var(--violet); background: var(--violet-dim); border-color: var(--violet); display: block; }
+  .hint-good    { color: var(--lime);   background: var(--lime-dim);   border-color: var(--lime);   display: block; }
+  .hint-great   { color: var(--cyan);   background: var(--cyan-dim);   border-color: var(--cyan);   display: block; }
+
+  /* MOTIVATIONAL BANNER in results */
+  .motivation-banner {
+    padding: 10px 14px; margin-bottom: 12px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px; line-height: 1.6; letter-spacing: 0.3px;
+    border-left: 3px solid; display: none;
+  }
+
+  .motivation-banner.danger  { background: var(--red-dim);    border-color: var(--red);    color: #ffa0b0; }
+  .motivation-banner.warn    { background: var(--amber-dim);  border-color: var(--amber);  color: #e8c97a; }
+  .motivation-banner.good    { background: var(--lime-dim);   border-color: var(--lime);   color: #c9a84c; }
+  .motivation-banner.great   { background: var(--cyan-dim);   border-color: var(--cyan);   color: var(--cyan); }
+
+  .pct-label {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 11px; color: var(--text-muted);
+    font-family: 'Courier New', Courier, monospace; pointer-events: none;
+  }
+
+  .mark-bar-mini { height: 2px; background: rgba(255,255,255,0.05); overflow: hidden; }
+  .mark-bar-fill { height: 100%; transition: width 0.4s ease; background: var(--cyan); }
+
+  /* INTEREST CHIPS */
+  .interest-chip-controls {
+    display: flex; gap: 8px; margin-bottom: 8px;
+  }
+
+  .chip-ctrl-btn {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9px; color: var(--text-muted);
+    background: transparent; border: 1px solid var(--border);
+    padding: 3px 10px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    transition: all 0.15s;
+  }
+
+  .chip-ctrl-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .interest-row {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;
+  }
+
+  .interest-chip {
+    padding: 5px 12px; border: 1px solid var(--border2);
+    background: transparent; font-size: 11px;
+    font-family: 'Courier New', Courier, monospace; color: var(--text-muted);
+    cursor: pointer; transition: all 0.18s; user-select: none;
+    letter-spacing: 0.3px; text-transform: uppercase;
+  }
+
+  .interest-chip:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+  .interest-chip.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
+
+  /* STREAM BUTTONS */
+  .stream-row { display: flex; gap: 8px; margin-bottom: 28px; }
+
+  .stream-btn {
+    flex: 1; padding: 9px 6px; border: 1px solid var(--border);
+    background: transparent; font-size: 11px; font-weight: 500;
+    font-family: 'Courier New', Courier, monospace; color: var(--text-muted);
+    cursor: pointer; text-align: center; transition: all 0.18s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .stream-btn:hover { border-color: var(--cyan); color: var(--cyan); background: var(--cyan-dim); }
+  .stream-btn.active { background: var(--cyan-dim); border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); }
+
+  /* CTA BUTTON - defined above with shimmer animation */
+
+  .cta-btn::before { content: ''; position: absolute; inset: 0; background: var(--cyan-dim); opacity: 0; transition: opacity 0.2s; }
+  .cta-btn:hover::before { opacity: 1; }
+  .cta-btn:hover { box-shadow: 0 0 24px var(--cyan-glow), 0 0 60px var(--cyan-glow); transform: translateY(-1px); }
+  .cta-btn:active { transform: translateY(0); }
+  .cta-btn svg { width: 18px; height: 18px; transition: transform 0.2s; position: relative; }
+  .cta-btn:hover svg { transform: translateX(5px); }
+  .cta-btn span { position: relative; }
+
+  /* RIGHT PANEL */
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* RESULTS CARD */
+  .results-card {
+    background: var(--panel); border: 1px solid var(--border);
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    overflow: hidden;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  .results-card.visible { opacity: 1; transform: translateY(0); }
+
+  .results-header {
+    background: linear-gradient(90deg, rgba(212,175,55,0.10) 0%, rgba(201,168,76,0.04) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 22px;
+    display: flex; align-items: flex-start; justify-content: space-between;
+  }
+
+  .results-header-title {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 20px; color: var(--white); letter-spacing: 2px; margin-bottom: 4px;
+  }
+
+  .results-header-sub {
+    font-size: 10px; color: var(--text);
+    font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px;
+  }
+
+  /* RESET BUTTON */
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--text-muted);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 9px; letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 5px 12px; cursor: pointer;
+    transition: all 0.18s; flex-shrink: 0;
+    clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+  }
+
+  .reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .results-body { padding: 16px; }
+
+  /* PERSONALIZED HEADING */
+  .result-greeting {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px; color: var(--cyan);
+    letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 12px;
+    padding: 6px 10px;
+    background: var(--cyan-dim);
+    border-left: 2px solid var(--cyan);
+  }
+
+  .course-rec {
+    padding: 12px 14px; margin-bottom: 8px;
+    border: 1px solid transparent;
+    transition: all 0.25s; cursor: pointer;
+    animation: slideIn 0.4s ease forwards;
+    opacity: 0; position: relative;
+  }
+
+  .course-rec::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; }
+
+  @keyframes slideIn { from{opacity:0;transform:translateX(-12px)} to{opacity:1;transform:translateX(0)} }
+
+  .course-rec:hover { transform: translateX(4px); }
+
+  .course-rec.top    { background: rgba(212,175,55,0.06); border-color: rgba(212,175,55,0.20); }
+  .course-rec.top::before { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .course-rec.good   { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.18); }
+  .course-rec.good::before { background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+  .course-rec.consider { background: rgba(184,148,46,0.05); border-color: rgba(184,148,46,0.18); }
+  .course-rec.consider::before { background: var(--violet); box-shadow: 0 0 8px var(--violet); }
+
+  .rec-header { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+
+  .rec-rank {
+    width:20px; height:20px; display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; font-family:'Courier New',Courier,monospace;
+    flex-shrink:0; border:1px solid;
+  }
+
+  .top .rec-rank    { border-color:var(--cyan);   color:var(--cyan); }
+  .good .rec-rank   { border-color:var(--lime);   color:var(--lime); }
+  .consider .rec-rank { border-color:var(--violet); color:var(--violet); }
+
+  .rec-name { font-weight:600; font-size:13px; flex:1; color:var(--white); }
+
+  .rec-tag {
+    font-size:9px; font-family:'Courier New',Courier,monospace;
+    padding:2px 8px; letter-spacing:1px; text-transform:uppercase; border:1px solid;
+  }
+
+  .top .rec-tag      { border-color:rgba(212,175,55,0.4);  color:var(--cyan); }
+  .good .rec-tag     { border-color:rgba(201,168,76,0.4);  color:var(--lime); }
+  .consider .rec-tag { border-color:rgba(184,148,46,0.4);  color:var(--violet); }
+
+  .rec-desc { font-size:11px; color:var(--text); line-height:1.5; margin-bottom:8px; }
+
+  .rec-match-bar { display:flex; align-items:center; gap:8px; }
+  .match-bar-wrap { flex:1; height:3px; background:rgba(255,255,255,0.05); overflow:hidden; }
+  .match-bar-fill { height:100%; transition:width 0.8s ease; }
+
+  .top .match-bar-fill     { background:var(--cyan);   box-shadow:0 0 6px var(--cyan); }
+  .good .match-bar-fill    { background:var(--lime);   box-shadow:0 0 6px var(--lime); }
+  .consider .match-bar-fill { background:var(--violet); box-shadow:0 0 6px var(--violet); }
+
+  .match-pct { font-size:11px; font-family:'Courier New',Courier,monospace; font-weight:700; min-width:36px; text-align:right; }
+  .top .match-pct      { color:var(--cyan); }
+  .good .match-pct     { color:var(--lime); }
+  .consider .match-pct { color:var(--violet); }
+
+  /* PROFILE CARD */
+  .profile-card {
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 20px;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.4s ease 0.15s, transform 0.4s ease 0.15s;
+  }
+
+  .profile-card.visible { opacity:1; transform:translateY(0); }
+
+  .profile-title {
+    font-family:'Palatino Linotype','Palatino','Book Antiqua',Georgia,serif; font-size:16px; letter-spacing:2px;
+    color:var(--white); margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+
+  .profile-title svg { color:var(--cyan); }
+
+  .strength-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+
+  .strength-row:last-child { border-bottom:none; }
+
+  .strength-name {
+    font-size:12px; color:var(--text);
+    display:flex; align-items:center; gap:6px;
+    font-family:'Courier New',Courier,monospace;
+  }
+
+  .strength-val {
+    font-family:'Courier New',Courier,monospace; font-size:12px; font-weight:700;
+    padding:2px 10px; border:1px solid;
+  }
+
+  .grade-A { border-color:rgba(212,175,55,0.5);  color:var(--cyan);   background:var(--cyan-dim); }
+  .grade-B { border-color:rgba(201,168,76,0.5);  color:var(--lime);   background:var(--lime-dim); }
+  .grade-C { border-color:rgba(232,201,122,0.4); color:var(--amber);  background:var(--amber-dim); }
+  .grade-D { border-color:rgba(255,77,106,0.4);  color:var(--red);    background:var(--red-dim); }
+  .grade-F { border-color:rgba(255,77,106,0.5);  color:var(--red);    background:rgba(255,77,106,0.18); }
+
+  /* PLACEHOLDER */
+  .placeholder-card {
+    background:var(--panel); border:1px dashed rgba(212,175,55,0.18);
+    padding:40px 28px; text-align:center;
+    clip-path:polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .placeholder-icon {
+    width:56px; height:56px; background:var(--cyan-dim); border:1px solid var(--border2);
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 16px;
+    clip-path:polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .placeholder-title {
+    font-family:'Palatino Linotype','Palatino','Book Antiqua',Georgia,serif; font-size:20px; letter-spacing:2px;
+    color:var(--text); margin-bottom:8px;
+  }
+
+  .placeholder-desc {
+    font-size:12px; color:var(--text); line-height:1.65;
+    font-family:'Courier New',Courier,monospace;
+  }
+
+  /* TIPS */
+  .tips-card { background:var(--bg2); border:1px solid var(--border); padding:16px 18px; }
+
+  .tips-title {
+    font-size:10px; font-family:'Courier New',Courier,monospace; color:var(--cyan);
+    letter-spacing:2px; text-transform:uppercase; margin-bottom:12px;
+    display:flex; align-items:center; gap:6px;
+  }
+
+  .tips-title::before { content:'//'; opacity:0.5; }
+
+  .tip-item {
+    display:flex; align-items:flex-start; gap:10px; margin-bottom:10px;
+    font-size:11px; font-family:'Courier New',Courier,monospace;
+    color:var(--text); line-height:1.5;
+  }
+
+  .tip-dot { width:4px; height:4px; background:var(--cyan); flex-shrink:0; margin-top:6px; box-shadow:0 0 6px var(--cyan); }
+
+
+
+  /* FOOTER */
+  footer {
+    background:var(--bg2); border-top:1px solid var(--border);
+    text-align:center; padding:24px;
+    font-size:11px; color:var(--text-muted);
+    font-family:'Courier New',Courier,monospace; letter-spacing:1px;
+    position:relative; z-index:1;
+  }
+
+  footer span { color:var(--cyan); }
+
+  /* LOADING */
+  .loading {
+    display:none; align-items:center; gap:10px;
+    font-size:12px; font-family:'Courier New',Courier,monospace;
+    color:var(--text-muted); padding:16px 0;
+  }
+
+  .spinner {
+    width:14px; height:14px;
+    border:1.5px solid var(--border2); border-top-color:var(--cyan);
+    animation:spin 0.8s linear infinite;
+    box-shadow:0 0 8px var(--cyan-glow);
+  }
+
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  @keyframes goldShimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+
+  .cta-btn {
+    width: 100%; padding: 16px;
+    background: linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.08) 50%, transparent 100%);
+    background-size: 200% auto;
+    border: 1px solid var(--cyan);
+    color: var(--cyan); font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: 15px; letter-spacing: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    transition: all 0.3s; position: relative; overflow: hidden;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+    animation: goldShimmer 3s linear infinite;
+  }
+
+  /* TOOLTIP */
+  .tooltip-wrap { position: relative; display: inline-flex; }
+  .tooltip-icon {
+    width:14px; height:14px; border-radius:50%;
+    border:1px solid var(--text-dim); color:var(--text-dim);
+    font-size:9px; display:flex; align-items:center; justify-content:center;
+    cursor:help; font-family:'Courier New',Courier,monospace; flex-shrink:0;
+  }
+
+  .tooltip-box {
+    position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--border2);
+    padding:8px 12px; width:180px;
+    font-size:10px; font-family:'Courier New',Courier,monospace;
+    color:var(--text-muted); line-height:1.5; letter-spacing:0.3px;
+    pointer-events:none; opacity:0; transition:opacity 0.15s;
+    z-index:200; white-space:normal;
+  }
+
+  .tooltip-wrap:hover .tooltip-box { opacity:1; }
+
+  /* RESPONSIVE */
+  @media (max-width:900px) {
+    .hero { grid-template-columns:1fr; padding:48px 20px 32px; gap:28px; }
+    .hero h1 { font-size:52px; }
+    .hero-visual { display:none; }
+    .main { grid-template-columns:1fr; padding:0 20px 48px; }
+    .subject-grid { grid-template-columns:1fr; }
+    header { padding:0 20px; }
+    .how-banner { padding:12px 20px; gap:6px; }
+    .how-formula { display:none; }
+  }
+
+  .hidden { display:none !important; }
+
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     GESTURE INTRO SLIDE
+═══════════════════════════════════════════════════════ -->
+<style>
+  /* ── INTRO SLIDE ── */
+  #intro-slide {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: #080808;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+    touch-action: pan-y;
+    transition: opacity 0.55s cubic-bezier(0.4,0,0.2,1),
+                transform 0.55s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  #intro-slide.dismissed {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+  }
+
+  /* grid overlay */
+  #intro-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 70% 60% at 50% 50%, rgba(212,175,55,0.13) 0%, transparent 65%),
+      linear-gradient(rgba(212,175,55,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,175,55,0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+    pointer-events: none;
+  }
+
+  /* scanline */
+  #intro-slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.045) 2px, rgba(0,0,0,0.045) 4px
+    );
+    pointer-events: none;
+  }
+
+  .intro-inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    text-align: center;
+    user-select: none;
+  }
+
+  /* ── eyebrow ── */
+  .intro-eyebrow {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(212,175,55,0.5);
+    margin-bottom: 36px;
+    animation: introFadeUp 0.9s 0.1s both;
+  }
+
+  /* ── big wordmark ── */
+  .intro-wordmark {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: clamp(52px, 8vw, 96px);
+    line-height: 1;
+    color: #f5e8c0;
+    letter-spacing: 6px;
+    margin-bottom: 6px;
+    animation: introFadeUp 0.9s 0.25s both;
+  }
+
+  .intro-wordmark span {
+    color: #d4af37;
+    text-shadow: 0 0 40px rgba(212,175,55,0.5);
+  }
+
+  .intro-tagline {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    color: rgba(122, 106, 58, 0.8);
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    margin-bottom: 80px;
+    animation: introFadeUp 0.9s 0.4s both;
+  }
+
+  /* ── divider ── */
+  .intro-divider {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, rgba(212,175,55,0.5), transparent);
+    margin-bottom: 48px;
+    animation: introFadeUp 0.9s 0.55s both;
+  }
+
+  /* ── hand + arrow ── */
+  .intro-gesture {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    animation: introFadeUp 0.9s 0.7s both;
+  }
+
+  .gesture-hand {
+    font-size: 36px;
+    animation: swipeHand 2s 1.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(212,175,55,0.4));
+  }
+
+  .gesture-arrows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .gesture-arrow {
+    width: 18px;
+    height: 18px;
+    border-left: 2px solid rgba(212,175,55,0.6);
+    border-top: 2px solid rgba(212,175,55,0.6);
+    transform: rotate(45deg) translateX(3px);
+  }
+
+  .gesture-arrow:nth-child(1) { opacity: 0.3; animation: arrowPulse 1.6s 1.6s ease-in-out infinite; }
+  .gesture-arrow:nth-child(2) { opacity: 0.6; animation: arrowPulse 1.6s 1.75s ease-in-out infinite; }
+  .gesture-arrow:nth-child(3) { opacity: 1;   animation: arrowPulse 1.6s 1.9s ease-in-out infinite; }
+
+  /* ── GET STARTED label ── */
+  .intro-cta {
+    font-family: 'Palatino Linotype', 'Palatino', 'Book Antiqua', Georgia, serif;
+    font-size: clamp(11px, 1.8vw, 15px);
+    letter-spacing: 0.55em;
+    text-transform: uppercase;
+    color: #d4af37;
+    text-shadow: 0 0 24px rgba(212,175,55,0.45);
+    animation: introFadeUp 0.9s 0.85s both, ctaGlow 2.4s 2s ease-in-out infinite;
+  }
+
+  /* ── corner deco marks ── */
+  .intro-corner {
+    position: absolute;
+    width: 36px; height: 36px;
+    z-index: 2;
+  }
+  .intro-corner::before,
+  .intro-corner::after {
+    content: '';
+    position: absolute;
+    background: #d4af37;
+  }
+  .intro-corner::before { width: 100%; height: 1px; top: 0; left: 0; }
+  .intro-corner::after  { width: 1px; height: 100%; top: 0; left: 0; }
+
+  .intro-corner.tl { top: 32px; left: 32px; }
+  .intro-corner.tr { top: 32px; right: 32px; transform: scaleX(-1); }
+  .intro-corner.bl { bottom: 32px; left: 32px; transform: scaleY(-1); }
+  .intro-corner.br { bottom: 32px; right: 32px; transform: scale(-1); }
+
+  /* ── animations ── */
+  @keyframes introFadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes swipeHand {
+    0%,100% { transform: translateY(0); }
+    40%     { transform: translateY(-28px); }
+    60%     { transform: translateY(-28px); opacity: 0.5; }
+    75%     { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes arrowPulse {
+    0%,100% { opacity: var(--base-op, 0.5); }
+    50%     { opacity: 1; }
+  }
+
+  @keyframes ctaGlow {
+    0%,100% { text-shadow: 0 0 14px rgba(212,175,55,0.3); }
+    50%     { text-shadow: 0 0 36px rgba(212,175,55,0.75), 0 0 60px rgba(212,175,55,0.25); }
+  }
+
+  /* hide body scroll while intro is showing */
+  body.intro-active { overflow: hidden; }
+</style>
+
+<div id="intro-slide">
+  <!-- corner decorations -->
+  <div class="intro-corner tl"></div>
+  <div class="intro-corner tr"></div>
+  <div class="intro-corner bl"></div>
+  <div class="intro-corner br"></div>
+
+  <div class="intro-inner">
+    <div class="intro-eyebrow">// smart match advisor · v2.0</div>
+
+    <div class="intro-wordmark">Course<span>Compass</span></div>
+    <div class="intro-tagline">AI-powered academic path finder</div>
+
+    <div class="intro-divider"></div>
+
+    <div class="intro-gesture">
+      <div class="gesture-hand">☝️</div>
+      <div class="gesture-arrows">
+        <div class="gesture-arrow"></div>
+        <div class="gesture-arrow"></div>
+        <div class="gesture-arrow"></div>
+      </div>
+    </div>
+
+    <div class="intro-cta">G E T &nbsp; S T A R T E D</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ── lock scroll on load ── */
+  document.body.classList.add('intro-active');
+
+  const slide = document.getElementById('intro-slide');
+  let startY = null;
+  let dismissed = false;
+
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    slide.classList.add('dismissed');
+    document.body.classList.remove('intro-active');
+    setTimeout(() => slide.remove(), 600);
+  }
+
+  /* swipe-up gesture */
+  slide.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+  slide.addEventListener('touchend', e => {
+    if (startY === null) return;
+    const dy = startY - e.changedTouches[0].clientY;
+    if (dy > 40) dismiss();
+    startY = null;
+  }, { passive: true });
+
+  /* mouse drag up (desktop preview) */
+  slide.addEventListener('mousedown', e => { startY = e.clientY; });
+  slide.addEventListener('mouseup',   e => {
+    if (startY === null) return;
+    const dy = startY - e.clientY;
+    if (dy > 20) dismiss();
+    startY = null;
+  });
+
+  /* click / tap also dismisses */
+  slide.addEventListener('click', dismiss);
+
+  /* keyboard: Space / Enter / ArrowUp */
+  document.addEventListener('keydown', e => {
+    if (['Space','Enter','ArrowUp'].includes(e.code)) dismiss();
+  });
+})();
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
+     END INTRO SLIDE
+═══════════════════════════════════════════════════════ -->
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 8v4l3 3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-name">Course<span>Compass</span></div>
+  </div>
+  <div class="header-tag">smart match advisor · v2.0</div>
+</header>
+
+<!-- HOW IT WORKS BANNER -->
+<div class="how-banner">
+  <div class="how-step">
+    <div class="how-step-num">1</div>
+    <div class="how-step-text">Enter Marks &amp; Name</div>
+  </div>
+  <div class="how-arrow">→</div>
+  <div class="how-step">
+    <div class="how-step-num">2</div>
+    <div class="how-step-text">Pick Interests &amp; Stream</div>
+  </div>
+  <div class="how-arrow">→</div>
+  <div class="how-step">
+    <div class="how-step-num">3</div>
+    <div class="how-step-text">Get Ranked Matches</div>
+  </div>
+  <div class="how-formula">
+    Score = <strong>70%</strong> Subject Match + <em>30%</em> Interest Match
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Smart Match Algorithm</div>
+    <h1>Find your <em>perfect</em><br>course path</h1>
+    <p class="hero-desc">Enter your subject marks and interests — our advisor analyses your academic strengths to recommend the courses where you'll truly thrive.</p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">24+</div>
+        <div class="stat-label">courses mapped</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4</div>
+        <div class="stat-label">streams</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">bias-free</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<main class="main">
+  <div class="form-card">
+    <div class="form-header">
+      <div>
+        <div class="form-header-title">Enter Your Academic Profile</div>
+        <div class="form-header-sub">marks out of 100 · all subject fields optional</div>
+      </div>
+      <div class="step-badge">1</div>
+    </div>
+    <div class="form-body">
+
+      <!-- STUDENT NAME -->
+      <div class="section-label">Your Name</div>
+      <div class="name-field">
+        <div class="name-input-wrap">
+          <input type="text" class="name-input" id="student-name" placeholder="Enter your name (e.g. Arjun Sharma)" maxlength="40" />
+        </div>
+      </div>
+
+      <div class="section-label">
+        Core Subjects
+        <div class="tooltip-wrap" style="margin-left:4px">
+          <div class="tooltip-icon">?</div>
+          <div class="tooltip-box">Enter your percentage marks (0–100) for each subject. Leave blank if not applicable to your stream.</div>
+        </div>
+      </div>
+
+      <div class="subject-grid">
+
+        <div class="subject-field">
+          <label><span class="subject-icon">➕</span>Mathematics</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="math" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-math'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-math" style="width:0"></div></div>
+          <div class="field-error" id="err-math">Value must be 0–100</div>
+          <div class="field-hint" id="hint-math"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">🔬</span>Physics</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="physics" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-physics'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-physics" style="width:0"></div></div>
+          <div class="field-error" id="err-physics">Value must be 0–100</div>
+          <div class="field-hint" id="hint-physics"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">⚗️</span>Chemistry</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="chemistry" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-chemistry'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-chemistry" style="width:0"></div></div>
+          <div class="field-error" id="err-chemistry">Value must be 0–100</div>
+          <div class="field-hint" id="hint-chemistry"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">🧬</span>Biology</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="biology" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-biology'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-biology" style="width:0"></div></div>
+          <div class="field-error" id="err-biology">Value must be 0–100</div>
+          <div class="field-hint" id="hint-biology"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">📖</span>English</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="english" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-english'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-english" style="width:0"></div></div>
+          <div class="field-error" id="err-english">Value must be 0–100</div>
+          <div class="field-hint" id="hint-english"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">🌍</span>Social Studies</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="social" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-social'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-social" style="width:0"></div></div>
+          <div class="field-error" id="err-social">Value must be 0–100</div>
+          <div class="field-hint" id="hint-social"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">💼</span>Commerce</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="commerce" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-commerce'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-commerce" style="width:0"></div></div>
+          <div class="field-error" id="err-commerce">Value must be 0–100</div>
+          <div class="field-hint" id="hint-commerce"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">🎨</span>Arts &amp; Design</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="arts" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-arts'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-arts" style="width:0"></div></div>
+          <div class="field-error" id="err-arts">Value must be 0–100</div>
+          <div class="field-hint" id="hint-arts"></div>
+        </div>
+
+        <div class="subject-field">
+          <label><span class="subject-icon">💻</span>Computer Science</label>
+          <div class="input-wrap">
+            <input type="number" class="mark-input" id="cs" placeholder="—" min="0" max="100"
+              oninput="updateBar(this,'bar-cs'); validateMark(this)">
+            <span class="pct-label">%</span>
+          </div>
+          <div class="mark-bar-mini"><div class="mark-bar-fill" id="bar-cs" style="width:0"></div></div>
+          <div class="field-error" id="err-cs">Value must be 0–100</div>
+          <div class="field-hint" id="hint-cs"></div>
+        </div>
+
+      </div>
+
+      <div class="section-label">Academic Stream</div>
+      <div class="stream-row">
+        <button class="stream-btn active" onclick="selectStream(this,'science')">Science</button>
+        <button class="stream-btn" onclick="selectStream(this,'commerce')">Commerce</button>
+        <button class="stream-btn" onclick="selectStream(this,'arts')">Arts</button>
+        <button class="stream-btn" onclick="selectStream(this,'tech')">Tech</button>
+        <button class="stream-btn" onclick="selectStream(this,'any')">Any</button>
+      </div>
+
+      <div class="section-label">
+        Interests
+        <div class="tooltip-wrap" style="margin-left:4px">
+          <div class="tooltip-icon">?</div>
+          <div class="tooltip-box">Select topics you enjoy. These are weighted at 30% of your final match score.</div>
+        </div>
+      </div>
+
+      <div class="interest-chip-controls">
+        <button class="chip-ctrl-btn" onclick="selectAllChips()">Select All</button>
+        <button class="chip-ctrl-btn" onclick="clearAllChips()">Clear All</button>
+      </div>
+
+      <div class="interest-row">
+        <div class="interest-chip" onclick="toggleInterest(this)">Technology</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Mathematics</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Creative Work</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">People &amp; Society</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Nature &amp; Environment</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Business &amp; Finance</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Writing &amp; Communication</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Medicine &amp; Health</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Research</div>
+        <div class="interest-chip" onclick="toggleInterest(this)">Problem Solving</div>
+      </div>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <span>Analysing your academic profile...</span>
+      </div>
+
+      <button class="cta-btn" onclick="getRecommendations()">
+        <span>Analyse &amp; Recommend</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-col">
+
+    <div id="placeholder-area">
+      <div class="placeholder-card">
+        <div class="placeholder-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00e6c8" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="placeholder-title">Awaiting Your Profile</div>
+        <div class="placeholder-desc">Enter your marks and interests on the left, then click Analyse to get your personalised course recommendations.</div>
+      </div>
+
+      <div class="tips-card" style="margin-top:20px">
+        <div class="tips-title">Quick Tips</div>
+        <div class="tip-item"><div class="tip-dot"></div><span>Enter marks only for subjects you have studied — blank fields are ignored.</span></div>
+        <div class="tip-item"><div class="tip-dot"></div><span>Select interest chips that match what you enjoy, not just what you are good at.</span></div>
+        <div class="tip-item"><div class="tip-dot"></div><span>Switch stream to "Any" to see cross-stream recommendations.</span></div>
+        <div class="tip-item"><div class="tip-dot"></div><span>Score formula: 70% subject match + 30% interest match.</span></div>
+      </div>
+    </div>
+
+    <div class="results-card" id="results-card">
+      <div class="results-header">
+        <div>
+          <div class="results-header-title">Your Recommendations</div>
+          <div class="results-header-sub" id="results-sub">—</div>
+        </div>
+        <button class="reset-btn" onclick="resetAll()">↺ Reset</button>
+      </div>
+      <div class="results-body">
+        <div class="result-greeting" id="result-greeting"></div>
+        <div class="motivation-banner" id="motivation-banner"></div>
+        <div id="results-body"></div>
+
+      </div>
+    </div>
+
+    <div class="profile-card" id="profile-card">
+      <div class="profile-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" stroke-linecap="round"/>
+        </svg>
+        Strength Profile
+      </div>
+      <div id="strengths-body"></div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>CourseCompass</span> · Smart Match Algorithm · Score = 70% Subject + 30% Interest · Built for Academic Guidance
+</footer>
+
+<script>
+let selectedStream = 'science';
+
+const COURSES = {
+  science: [
+    { name:'Computer Science & Engineering', tags:['Technology','Mathematics','Problem Solving'], subjects:{math:0.35,physics:0.2,cs:0.3,english:0.1}, minAvg:65, desc:'Build software, systems and algorithms that power the digital world.' },
+    { name:'Data Science & AI', tags:['Technology','Mathematics','Research'], subjects:{math:0.4,cs:0.25,physics:0.1,english:0.1}, minAvg:68, desc:'Extract insights from data using statistics, ML and visualisation.' },
+    { name:'Electronics & Communication', tags:['Technology','Mathematics','Problem Solving'], subjects:{math:0.4,physics:0.4,english:0.08}, minAvg:65, desc:'Design circuits, communication systems and embedded hardware.' },
+    { name:'Mechanical Engineering', tags:['Mathematics','Problem Solving','Nature & Environment'], subjects:{math:0.4,physics:0.35,chemistry:0.1,english:0.08}, minAvg:62, desc:'Design and build machines, engines and manufacturing systems.' },
+    { name:'Medicine (MBBS)', tags:['Medicine & Health','Research','People & Society'], subjects:{biology:0.5,chemistry:0.35,physics:0.1,english:0.08}, minAvg:75, desc:'Diagnose and treat patients across all areas of human health.' },
+    { name:'Pharmacy (B.Pharm)', tags:['Medicine & Health','Research','Nature & Environment'], subjects:{chemistry:0.45,biology:0.35,math:0.1,english:0.08}, minAvg:65, desc:'Develop, test and dispense medicines and pharmaceutical products.' },
+    { name:'Biotechnology', tags:['Research','Medicine & Health','Nature & Environment'], subjects:{biology:0.45,chemistry:0.35,math:0.1,english:0.08}, minAvg:62, desc:'Apply biological systems to develop new medicines, foods and materials.' },
+    { name:'Applied Mathematics', tags:['Mathematics','Problem Solving','Research'], subjects:{math:0.7,physics:0.15,english:0.05}, minAvg:70, desc:'Advance theoretical and applied mathematical understanding.' },
+    { name:'Architecture', tags:['Creative Work','Mathematics','Technology'], subjects:{math:0.3,arts:0.35,physics:0.15,english:0.1}, minAvg:60, desc:'Design buildings and spaces that balance aesthetics with function.' },
+  ],
+  commerce: [
+    { name:'Chartered Accountancy (CA)', tags:['Business & Finance','Mathematics','Problem Solving'], subjects:{math:0.35,commerce:0.45,english:0.1}, minAvg:65, desc:'Master financial accounting, auditing, and tax law at the highest level.' },
+    { name:'Business Administration (BBA/MBA)', tags:['Business & Finance','People & Society','Writing & Communication'], subjects:{commerce:0.35,english:0.25,math:0.2,social:0.1}, minAvg:55, desc:'Learn to lead organisations, manage teams, and drive strategy.' },
+    { name:'Economics (Hons.)', tags:['Business & Finance','Mathematics','Research'], subjects:{commerce:0.3,math:0.35,social:0.2,english:0.1}, minAvg:60, desc:'Analyse markets, policy, and resource allocation in a complex world.' },
+    { name:'Finance & Investment Banking', tags:['Business & Finance','Mathematics','Problem Solving'], subjects:{math:0.35,commerce:0.4,english:0.15}, minAvg:68, desc:'Navigate capital markets, valuations, and financial instruments.' },
+    { name:'Marketing & Digital Media', tags:['Creative Work','People & Society','Writing & Communication'], subjects:{english:0.35,commerce:0.3,arts:0.15,social:0.1}, minAvg:55, desc:'Build brands, run campaigns, and connect products with people.' },
+    { name:'Law (LLB)', tags:['People & Society','Writing & Communication','Research'], subjects:{english:0.45,social:0.3,commerce:0.1}, minAvg:60, desc:'Interpret and practice law in corporate, criminal, or civil contexts.' },
+  ],
+  arts: [
+    { name:'Journalism & Mass Communication', tags:['Writing & Communication','People & Society','Creative Work'], subjects:{english:0.5,social:0.25,arts:0.1}, minAvg:55, desc:'Report, investigate, and tell stories that inform and shape society.' },
+    { name:'Psychology', tags:['People & Society','Medicine & Health','Research'], subjects:{biology:0.2,english:0.3,social:0.3,math:0.1}, minAvg:58, desc:'Understand human behaviour, cognition, emotion, and mental health.' },
+    { name:'Fine Arts & Design', tags:['Creative Work','Technology','Writing & Communication'], subjects:{arts:0.55,english:0.2,social:0.1}, minAvg:50, desc:'Create visual experiences through painting, sculpture, or digital design.' },
+    { name:'Political Science / IR', tags:['People & Society','Writing & Communication','Research'], subjects:{social:0.45,english:0.35,commerce:0.1}, minAvg:55, desc:'Analyse governance, diplomacy, and global political dynamics.' },
+    { name:'Literature & Linguistics', tags:['Writing & Communication','Creative Work','Research'], subjects:{english:0.65,social:0.15,arts:0.1}, minAvg:58, desc:'Explore language, narrative, and human expression through texts.' },
+    { name:'Social Work', tags:['People & Society','Nature & Environment','Writing & Communication'], subjects:{social:0.4,english:0.3,biology:0.1}, minAvg:50, desc:'Advocate for communities, develop policy, and support vulnerable groups.' },
+  ],
+  tech: [
+    { name:'Artificial Intelligence & ML', tags:['Technology','Mathematics','Problem Solving'], subjects:{math:0.4,cs:0.3,physics:0.1,english:0.1}, minAvg:70, desc:'Build intelligent systems — neural networks, NLP, computer vision.' },
+    { name:'Cybersecurity', tags:['Technology','Problem Solving','Research'], subjects:{math:0.25,cs:0.35,physics:0.1,english:0.15}, minAvg:60, desc:'Protect digital infrastructure from attacks and vulnerabilities.' },
+    { name:'UX/UI Design', tags:['Creative Work','Technology','People & Society'], subjects:{arts:0.4,english:0.25,math:0.15,social:0.1}, minAvg:55, desc:'Create user-centred digital products that are intuitive and delightful.' },
+    { name:'Game Development', tags:['Technology','Creative Work','Problem Solving','Mathematics'], subjects:{math:0.25,cs:0.25,physics:0.15,arts:0.2,english:0.1}, minAvg:58, desc:'Design, code, and ship interactive entertainment experiences.' },
+    { name:'Cloud Computing & DevOps', tags:['Technology','Problem Solving','Mathematics'], subjects:{math:0.3,cs:0.3,physics:0.15,english:0.15}, minAvg:62, desc:'Manage scalable infrastructure and automate software delivery pipelines.' },
+    { name:'Robotics & Automation', tags:['Technology','Problem Solving','Mathematics','Nature & Environment'], subjects:{math:0.35,physics:0.35,cs:0.15,english:0.1}, minAvg:65, desc:'Build machines that perceive, decide, and act in the physical world.' },
+  ],
+  any: []
+};
+
+COURSES.any = [...COURSES.science, ...COURSES.commerce, ...COURSES.arts, ...COURSES.tech];
+
+function getVal(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? null : Math.min(100, Math.max(0, v));
+}
+
+const SUBJECT_HINTS = {
+  math:     'Maths',
+  physics:  'Physics',
+  chemistry:'Chemistry',
+  biology:  'Biology',
+  english:  'English',
+  social:   'Social Studies',
+  commerce: 'Commerce',
+  arts:     'Arts & Design',
+  cs:       'Computer Science'
+};
+
+const MOTIVATE_MESSAGES = [
+  "Every expert was once a beginner. Keep going! 💪",
+  "Low marks today = lessons learned for tomorrow. You've got this!",
+  "This is just a starting point — hard work can change everything.",
+  "Even the greatest scientists failed before they succeeded. Don't stop!",
+  "Your marks don't define your potential. Your effort does.",
+  "One bad score is not the end of the road — it's a bend in it.",
+  "Champions train where others quit. Use this as fuel! 🔥"
+];
+
+function getMotivate() {
+  return MOTIVATE_MESSAGES[Math.floor(Math.random() * MOTIVATE_MESSAGES.length)];
+}
+
+function validateMark(input) {
+  const v = parseFloat(input.value);
+  const id = input.id;
+  const errEl = document.getElementById('err-' + id);
+  const hintEl = document.getElementById('hint-' + id);
+  const subjectName = SUBJECT_HINTS[id] || 'This subject';
+
+  // Reset all states
+  input.classList.remove('error', 'warn-low', 'warn-mid', 'great');
+  if (errEl) errEl.style.display = 'none';
+  if (hintEl) { hintEl.className = 'field-hint'; hintEl.textContent = ''; }
+
+  if (input.value === '') return;
+
+  if (isNaN(v) || v < 0 || v > 100) {
+    input.classList.add('error');
+    if (errEl) errEl.style.display = 'block';
+    return;
+  }
+
+  if (!hintEl) return;
+
+  if (v < 30) {
+    input.classList.add('warn-low');
+    hintEl.className = 'field-hint hint-danger';
+    hintEl.textContent = `⚠ ${subjectName}: ${v}% — Don't worry! ${getMotivate()}`;
+  } else if (v < 50) {
+    input.classList.add('warn-low');
+    hintEl.className = 'field-hint hint-warn';
+    hintEl.textContent = `📌 ${subjectName}: ${v}% — Needs improvement. A little more practice can push this higher!`;
+  } else if (v < 65) {
+    input.classList.add('warn-mid');
+    hintEl.className = 'field-hint hint-ok';
+    hintEl.textContent = `✦ ${subjectName}: ${v}% — Decent score! You're on the right track. Keep pushing!`;
+  } else if (v < 80) {
+    hintEl.className = 'field-hint hint-good';
+    hintEl.textContent = `✓ ${subjectName}: ${v}% — Good work! This opens up strong course options for you.`;
+  } else {
+    input.classList.add('great');
+    hintEl.className = 'field-hint hint-great';
+    hintEl.textContent = `🌟 ${subjectName}: ${v}% — Excellent! You're a top performer in this subject!`;
+  }
+}
+
+function updateBar(input, barId) {
+  const v = parseFloat(input.value);
+  const bar = document.getElementById(barId);
+  if (!isNaN(v) && v >= 0 && v <= 100) {
+    bar.style.width = v + '%';
+  } else {
+    bar.style.width = '0';
+  }
+}
+
+function selectStream(btn, stream) {
+  document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedStream = stream;
+}
+
+function toggleInterest(chip) { chip.classList.toggle('active'); }
+
+function selectAllChips() {
+  document.querySelectorAll('.interest-chip').forEach(c => c.classList.add('active'));
+}
+
+function clearAllChips() {
+  document.querySelectorAll('.interest-chip').forEach(c => c.classList.remove('active'));
+}
+
+function getGradeLetter(score) {
+  if (score >= 90) return 'A+';
+  if (score >= 80) return 'A';
+  if (score >= 70) return 'B+';
+  if (score >= 60) return 'B';
+  if (score >= 50) return 'C';
+  if (score >= 40) return 'D';
+  return 'F';
+}
+
+function getGradeClass(score) {
+  if (score >= 70) return 'grade-A';
+  if (score >= 60) return 'grade-B';
+  if (score >= 50) return 'grade-C';
+  if (score >= 40) return 'grade-D';
+  return 'grade-F';
+}
+
+function hasErrors() {
+  return document.querySelectorAll('.mark-input.error').length > 0;
+}
+
+function getRecommendations() {
+  if (hasErrors()) {
+    alert('Please fix the highlighted errors before continuing (marks must be 0–100).');
+    return;
+  }
+
+  const marks = {
+    math: getVal('math'), physics: getVal('physics'),
+    chemistry: getVal('chemistry'), biology: getVal('biology'),
+    english: getVal('english'), social: getVal('social'),
+    commerce: getVal('commerce'), arts: getVal('arts'),
+    cs: getVal('cs'),
+  };
+
+  const filledMarks = Object.entries(marks).filter(([,v]) => v !== null);
+  if (filledMarks.length === 0) {
+    alert('Please enter at least one subject mark to get recommendations.');
+    return;
+  }
+
+  document.getElementById('loading').style.display = 'flex';
+  document.querySelector('.cta-btn').style.opacity = '0.6';
+
+  setTimeout(() => {
+    document.getElementById('loading').style.display = 'none';
+    document.querySelector('.cta-btn').style.opacity = '1';
+
+    const courses = COURSES[selectedStream] || COURSES.any;
+    const activeInterests = Array.from(document.querySelectorAll('.interest-chip.active')).map(c => c.textContent.trim());
+
+    const scored = courses.map(course => {
+      let subjectScore = 0, totalWeight = 0;
+      for (const [subj, weight] of Object.entries(course.subjects)) {
+        if (marks[subj] !== null) {
+          subjectScore += marks[subj] * weight;
+          totalWeight += weight;
+        }
+      }
+      const normalizedSubject = totalWeight > 0 ? (subjectScore / totalWeight) : 50;
+      const matchedInterests = course.tags.filter(t => activeInterests.includes(t)).length;
+      const interestScore = activeInterests.length > 0 ? (matchedInterests / course.tags.length) * 100 : 60;
+      const finalScore = normalizedSubject * 0.7 + interestScore * 0.3;
+      const meetsMin = normalizedSubject >= course.minAvg;
+      return { ...course, finalScore: Math.round(finalScore), meetsMin };
+    });
+
+    scored.sort((a, b) => b.finalScore - a.finalScore);
+    const top = scored.slice(0, 6);
+
+    displayResults(top, marks, activeInterests);
+  }, 900);
+}
+
+function displayResults(courses, marks, interests) {
+  document.getElementById('placeholder-area').style.display = 'none';
+
+  const resultsCard = document.getElementById('results-card');
+  const body = document.getElementById('results-body');
+  const studentName = document.getElementById('student-name').value.trim();
+
+  const filledCount = Object.values(marks).filter(v => v !== null).length;
+  document.getElementById('results-sub').textContent =
+    `${filledCount} subject${filledCount !== 1 ? 's' : ''} · ${interests.length} interest${interests.length !== 1 ? 's' : ''} · ${selectedStream} stream`;
+
+  // Personalised greeting
+  const greeting = document.getElementById('result-greeting');
+  greeting.textContent = studentName
+    ? `✓ Best matches for ${studentName}`
+    : `✓ Your personalised course matches`;
+
+  // Motivational banner based on average marks
+  const filledVals = Object.values(marks).filter(v => v !== null);
+  const avg = filledVals.length > 0 ? filledVals.reduce((a,b) => a+b, 0) / filledVals.length : 0;
+  const banner = document.getElementById('motivation-banner');
+  const name = studentName ? studentName : 'You';
+
+  if (avg < 30) {
+    banner.className = 'motivation-banner danger';
+    banner.innerHTML = `⚠ ${name}, your average is ${Math.round(avg)}% right now — but this is just the beginning!<br>Every great achiever started somewhere. With dedication and the right course, you can turn this around completely. 💪 Don't give up!`;
+    banner.style.display = 'block';
+  } else if (avg < 50) {
+    banner.className = 'motivation-banner warn';
+    banner.innerHTML = `📌 ${name}, average: ${Math.round(avg)}% — Room to grow, and that's okay!<br>The courses below match your current strengths. Focus, practice, and you'll be surprised how fast you improve. Keep going!`;
+    banner.style.display = 'block';
+  } else if (avg < 70) {
+    banner.className = 'motivation-banner good';
+    banner.innerHTML = `✦ ${name}, average: ${Math.round(avg)}% — Solid performance!<br>You have a good foundation. The right course choice will help you excel even further. Trust the process!`;
+    banner.style.display = 'block';
+  } else {
+    banner.className = 'motivation-banner great';
+    banner.innerHTML = `🌟 ${name}, average: ${Math.round(avg)}% — Outstanding work!<br>Your marks reflect real dedication. You have strong options ahead — choose what excites you most!`;
+    banner.style.display = 'block';
+  }
+
+  body.innerHTML = '';
+
+  courses.forEach((c, i) => {
+    const tier = i === 0 ? 'top' : i < 3 ? 'good' : 'consider';
+    const delay = i * 0.08;
+
+    const div = document.createElement('div');
+    div.className = `course-rec ${tier}`;
+    div.style.animationDelay = `${delay}s`;
+
+    const matchedInterests = c.tags.filter(t => interests.includes(t));
+    const interestNote = matchedInterests.length > 0
+      ? `<br><span style="color:#d4af37;font-size:10px;font-family:'Courier New',Courier,monospace">✓ Matches: ${matchedInterests.join(', ')}</span>`
+      : '';
+
+    const warningNote = !c.meetsMin
+      ? `<br><span style="color:#ff4d6a;font-size:10px;font-family:'Courier New',Courier,monospace">⚠ Marks slightly below ideal minimum</span>`
+      : '';
+
+    div.innerHTML = `
+      <div class="rec-header">
+        <div class="rec-rank">${i + 1}</div>
+        <div class="rec-name">${c.name}</div>
+      </div>
+      <div class="rec-desc">${c.desc}${interestNote}${warningNote}</div>
+      <div class="rec-match-bar">
+        <div class="match-bar-wrap"><div class="match-bar-fill" style="width:0" data-width="${c.finalScore}%"></div></div>
+        <div class="match-pct">${c.finalScore}%</div>
+      </div>`;
+    body.appendChild(div);
+  });
+
+  resultsCard.classList.add('visible');
+
+  setTimeout(() => {
+    document.querySelectorAll('.match-bar-fill[data-width]').forEach(bar => {
+      bar.style.width = bar.dataset.width;
+    });
+  }, 100);
+
+  displayStrengths(marks);
+}
+
+function displayStrengths(marks) {
+  const profileCard = document.getElementById('profile-card');
+  const body = document.getElementById('strengths-body');
+
+  const SUBJECT_LABELS = {
+    math:     { label:'Mathematics',       icon:'➕' },
+    physics:  { label:'Physics',           icon:'🔬' },
+    chemistry:{ label:'Chemistry',         icon:'⚗️' },
+    biology:  { label:'Biology',           icon:'🧬' },
+    english:  { label:'English',           icon:'📖' },
+    social:   { label:'Social Studies',    icon:'🌍' },
+    commerce: { label:'Commerce',          icon:'💼' },
+    arts:     { label:'Arts & Design',     icon:'🎨' },
+    cs:       { label:'Computer Science',  icon:'💻' },
+  };
+
+  const filled = Object.entries(marks).filter(([,v]) => v !== null);
+  filled.sort((a, b) => b[1] - a[1]);
+
+  body.innerHTML = filled.map(([key, val]) => `
+    <div class="strength-row">
+      <span class="strength-name">${SUBJECT_LABELS[key].icon} ${SUBJECT_LABELS[key].label}</span>
+      <span class="strength-val ${getGradeClass(val)}">${val}% · ${getGradeLetter(val)}</span>
+    </div>
+  `).join('');
+
+  profileCard.classList.add('visible');
+}
+
+function resetAll() {
+  // Clear inputs
+  document.querySelectorAll('.mark-input').forEach(inp => {
+    inp.value = '';
+    inp.classList.remove('error');
+  });
+  document.querySelectorAll('.mark-bar-fill').forEach(b => b.style.width = '0');
+  document.querySelectorAll('.field-error').forEach(e => e.style.display = 'none');
+  document.getElementById('student-name').value = '';
+  clearAllChips();
+
+  // Reset stream
+  document.querySelectorAll('.stream-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.stream-btn').classList.add('active');
+  selectedStream = 'science';
+
+  // Hide results
+  document.getElementById('results-card').classList.remove('visible');
+  document.getElementById('profile-card').classList.remove('visible');
+  document.getElementById('placeholder-area').style.display = 'block';
+  document.getElementById('results-body').innerHTML = '';
+  document.getElementById('strengths-body').innerHTML = '';
+  const banner = document.getElementById('motivation-banner');
+  banner.style.display = 'none'; banner.className = 'motivation-banner';
+}
+
+
+</script>
+</body>
+</html>
