@@ -2,7 +2,7 @@
 
 CourseCompass is a smart, browser-based web application that helps students discover the right academic course based on their subject performance and personal interests. Instead of leaving course selection to guesswork, it converts marks and preferences into clear, ranked, and personalized recommendations.
 
-🔗 Live Demo: [Add your live demo link here]
+🔗 Live Demo: [https://github.com/Thejas127/course-compass]
 
 
 ✨ Features
